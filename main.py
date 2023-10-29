@@ -9,6 +9,7 @@ ROWS = 3
 COLS = 3
 
 bet_amounts = []
+added_moneys = []
 
 symbol_count = {
   "A": 2,
@@ -18,7 +19,7 @@ symbol_count = {
 }
 
 symbol_value = {
-  "A": 20,
+  "A": 25,
   "B": 15,
   "C": 10,
   "D": 5
@@ -71,10 +72,10 @@ def print_slot_machine(columns):
 
     print()
 
-  
+
 def deposit():
   while True:
-    
+
     amount = input("How much would you like to deposit? $")
     if amount.isdigit():
       amount = int(amount)
@@ -84,7 +85,7 @@ def deposit():
         print("Amount must be greater that 0.")
     else:
       print("Please enter a valid number")
-  
+
   return amount
 
 def num_of_lines():
@@ -101,7 +102,7 @@ def num_of_lines():
         print("Amount must be between 1-3.")
     else:
       print("Please enter a valid number")
-  
+
   return lines
 
 def get_bet():
@@ -115,8 +116,33 @@ def get_bet():
         print(f"Amount must be between ${MIN_BET} and ${MAX_BET}. ")
     else:
       print("Please enter a valid number")
-  
+
   return bet
+
+def low_bal(balance):
+  if balance < 50:
+    print()
+    if balance == 0:
+      print("YOUR OUT OF MONEY")
+    else:
+      print("YOUR ALMOST OUT OF MONEY")
+    print("---------------------")
+  while balance < 50:
+    
+    added_money = input("You've almost, or have, run out of money, how much would you like to add? $")
+    if added_money.isdigit():
+        added_money = int(added_money)
+        if added_money > 0:
+            balance += added_money
+            added_moneys.append(added_money)
+            break
+        else:
+            print("Enter a number greater than 0.")
+    else:
+        print("Please enter a valid number")
+
+  return balance
+
 
 
 def spin(balance):
@@ -145,22 +171,29 @@ def spin(balance):
   print()
   print("INFO")
   print("------------------")
-  print(f"You won ${winnings}")
-  print(f"You won on line:", *winning_lines)
+  if winnings - bet > 0:
+    print(f"You won ${winnings - bet}")
+  else:
+    print(f"You lost ${abs(winnings - (bet*lines))}")
+  if winnings > 0:
+    print(f"You won on line:", *winning_lines)
+  
   return winnings - total_bet
   
 
 
+
 def main():
-  
+
   count = 0 
   balance = deposit()
   initial_bal = balance
-  
-  
+
+
   
   
   while True:
+    balance = low_bal(balance)
     print(f"Your current balance is: ${balance}")
     print()
     answer = input("Press enter to play (q to quit)")
@@ -169,30 +202,34 @@ def main():
     if answer == "q":
       break
     balance += spin(balance)
-    
+
     count += 1
 
   #calculate values for end screen
   if count > 0:
     avg_bet = sum(bet_amounts)/len(bet_amounts)
-  total_dif = initial_bal - balance
+  total_dif = (balance - sum(added_moneys)) - initial_bal
+  
 
   #end screen
   print()
   print("STATS")
   print("-----------")
-  print(f"You started with ${initial_bal}")
-  print(f"You left with ${balance}")
-  print(f"You played {count} time(s)")
+  print(f"You started with: ${initial_bal}")
+  if sum(added_moneys) > 0:
+    print(f"You added: ${sum(added_moneys)}")
+  print(f"You left with: ${balance}")
+  print(f"You played: {count} time(s)")
   if count > 0:
     print(f"Your average bet was ${avg_bet}")
-
-  if total_dif > 0:
-    print(f"You lost $ -{abs(total_dif)}")
-   
-  else: 
+  #print if the user lost or gained money
+  if total_dif < 0:
+    print(f"You lost $ {abs(total_dif)}")
+  elif total_dif > 0: 
     print(f"You won ${abs(total_dif)}")
-    
+  else:
+    print("You: Broke even")
 
-  
+
+
 main()
